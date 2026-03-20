@@ -11,8 +11,9 @@ from gis4wrf.plugin.constants import GIS4WRF_LOGO_PATH
 
 class HomeTab(QWidget):
     """Class for creating the Home tab"""
-    def __init__(self) -> None:
+    def __init__(self, iface) -> None:
         super().__init__()
+        self.iface = iface
         vbox = QVBoxLayout()
         title = """
                     <html>
