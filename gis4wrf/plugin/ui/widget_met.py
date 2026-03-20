@@ -125,11 +125,12 @@ class MetToolsDownloadManager(QWidget):
         dataset_name = self.cbox_dataset.currentData()
         if dataset_name is None:
             return
-        auth = (self.options.rda_username, self.options.rda_password)
-        self.products = get_met_products(dataset_name, auth)
+        # Metadata API does not need auth; second argument is ignored
+        api_token = self.options.rda_password  # store your GDEX API token here
+        self.products = get_met_products(dataset_name, (None, api_token))
         for product in self.products.keys():
             self.cbox_product.addItem(product, product)
-
+            
     def on_product_changed(self, index: int):
         if index == -1:
             return
@@ -187,10 +188,12 @@ class MetToolsDownloadManager(QWidget):
         lat_south = self.bottom.value()
         lon_west = self.left.value()
         lon_east = self.right.value()
-        auth = (self.options.rda_username, self.options.rda_password)
-
+    
+        # Use GDEX API token (stored in options.rda_password) for all RDA requests
+        api_token = self.options.rda_password
+    
         thread = TaskThread(
-            lambda: download_met_dataset(self.options.met_dir, auth, 
+            lambda: download_met_dataset(self.options.met_dir, api_token,
                                          dataset_name, product_name, param_names,
                                          start_date, end_date,
                                          lat_south, lat_north, lon_west, lon_east),
