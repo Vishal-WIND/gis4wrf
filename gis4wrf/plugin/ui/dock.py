@@ -37,3 +37,9 @@ class MainDock(QDockWidget):
                 self.setStyleSheet(f.read())
 
         self.simulation_tab.view_wrf_nc_file.connect(self.view_wrf_nc_file)
+    def open_view_tab(self) -> None:
+        self.tabs.setCurrentIndex(3)
+
+    def view_wrf_nc_file(self, path: str) -> None:
+        self.view_tab.set_wrf_nc_file(path)
+        self.open_view_tab()
