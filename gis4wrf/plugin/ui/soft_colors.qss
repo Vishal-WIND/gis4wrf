@@ -1,0 +1,16 @@
+/* Apply only to the GIS4WRF dock */
+QDockWidget#g4wDock QLineEdit,
+QDockWidget#g4wDock QComboBox,
+QDockWidget#g4wDock QSpinBox,
+QDockWidget#g4wDock QDoubleSpinBox {
+    background-color: rgb(235, 255, 235);   /* very light green */
+    color: rgb(0, 0, 0);                    /* black text */
+    selection-background-color: rgb(51, 153, 255);
+    selection-color: rgb(255, 255, 255);
+}
+
+/* Required fields (if you use this property later) */
+QDockWidget#g4wDock QLineEdit[requiredField="true"] {
+    background-color: rgb(245, 255, 230);
+    color: rgb(0, 0, 0);
+}
