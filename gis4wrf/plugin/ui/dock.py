@@ -2,8 +2,8 @@
 # Copyright (c) 2018 D. Meyer and M. Riechert. Licensed under MIT.
 
 from PyQt5.QtWidgets import QDockWidget, QTabWidget
-
 from qgis.gui import QgisInterface
+import os
 
 from gis4wrf.plugin.ui.tab_home import HomeTab
 from gis4wrf.plugin.ui.tab_datasets import DatasetsTab
