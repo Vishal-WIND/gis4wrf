@@ -22,7 +22,13 @@ COMPLETED_STATUS = 'Completed'
 ERROR_STATUS = ['Error']
 IGNORE_FILES = ['.csh']
 
-API_BASE_URL = 'https://rda.ucar.edu/json_apps/'
+# Old JSON-based API for subset/download requests
+API_BASE_URL = 'https://rda.ucar.edu/json_apps'
+
+# New GDEX API for dataset metadata (parameters, products, date ranges)
+METADATA_API_BASE_URL = 'https://gdex.ucar.edu/api'
+
+# Legacy scripted login URL (we will remove this in step 3)
 DOWNLOAD_LOGIN_URL = 'https://rda.ucar.edu/cgi-bin/login'
 
 def parse_date(date: int) -> datetime:
@@ -43,12 +49,43 @@ def get_result(response: requests.Response) -> dict:
 
 @export
 def get_met_products(dataset_name: str, auth: tuple) -> dict:
-    # Retrieve raw metadata
+    """
+    Use the new GDEX metadata API to get products and parameters for a dataset
+    (e.g. ds083.2, ds083.3, ds084.1).
+
+    Returns:
+        products[product_name][param_name] = {
+            'start_date': datetime,
+            'end_date': datetime,
+            'label': param_label,
+        }
+    """
     with requests_retry_session() as session:
-        response = session.get(f'{API_BASE_URL}/metadata/{dataset_name}', auth=auth)
-        result = get_result(response)
-    products = {} # type: dict
-    for entry in result['data']:
+        url = f'{METADATA_API_BASE_URL}/metadata/{dataset_name}/'
+        response = session.get(url)
+        response.raise_for_status()
+        try:
+            obj = response.json()
+        except Exception:
+            raise UserError('RDA error (metadata JSON): ' + response.text)
+
+    # Expected shape:
+    # {
+    #   "status": "ok",
+    #   "http_response": 200,
+    #   "error_messages": [],
+    #   "data": { "subsetting_available": true, "dsid": "...", "data": [ ... ] }
+    # }
+    status = obj.get('status')
+    if status != 'ok':
+        messages = obj.get('error_messages') or []
+        raise UserError('RDA error (metadata): ' + ' '.join(messages))
+
+    inner = obj['data']
+    records = inner['data']
+
+    products: dict = {}
+    for entry in records:
         product_name = entry['product']
         param_name = entry['param']
         param_label = entry['param_description']
@@ -61,8 +98,9 @@ def get_met_products(dataset_name: str, auth: tuple) -> dict:
             product[param_name] = {
                 'start_date': start_date,
                 'end_date': end_date,
-                'label': param_label
+                'label': param_label,
             }
+
     return products
 
 @export
