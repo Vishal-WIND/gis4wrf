@@ -3,6 +3,7 @@
 
 from gis4wrf.core.constants import WRF_EARTH_RADIUS
 from gis4wrf.core.util import osr, ogr, export, as_float, Number
+from osgeo import osr
 
 @export
 class Coordinate2D(object):
