@@ -182,7 +182,12 @@ class CRS(object):
         srs_out = osr.SpatialReference()
         fix_axis_order(srs_out)
         srs_out.SetGeogCS('', datum, '', srs.GetSemiMajor(), srs.GetInvFlattening())
-        assert not srs_out.EPSGTreatsAsLatLong(), 'expected lon/lat axis order'
+        try:
+            # For GDAL 3+, allow authority-compliant axis order; we always treat coords as lon/lat
+            srs_out.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        except AttributeError:
+            # Older GDAL without axis-mapping strategy; nothing to do
+            pass
         return srs_out
 
     @staticmethod
